@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Head from "next/head";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -27,9 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <meta name="google-site-verification" content="CtXn4Cp66n2avOIts0KUrqlJ1CQEaG5pSqOIX0Vr9Z4" />
-      </Head>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
