@@ -16,7 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Leaf It To Me",
-  description: "Stop wasting time, verify your tree now",
+  description: "Stop wasting time, and verify your tree now",
 };
 
 export default function RootLayout({
