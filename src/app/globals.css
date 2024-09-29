@@ -7,6 +7,29 @@
   --foreground: #171717;
 }
 
+::-webkit-scrollbar {
+  height:3px;
+	width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: #306fc2;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #51c4f5;
+	border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #9feef5;
+}
+
+::-webkit-scrollbar-thumb:focus {
+	background: #9feef5;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
