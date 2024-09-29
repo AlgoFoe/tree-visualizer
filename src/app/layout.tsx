@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Head from "next/head";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -16,7 +17,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Leaf It To Me",
-  description: "Stop fucking up your time, and just verify your tree",
+  description: "Stop wasting time, verify your tree now",
 };
 
 export default function RootLayout({
@@ -26,6 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <meta name="google-site-verification" content="CtXn4Cp66n2avOIts0KUrqlJ1CQEaG5pSqOIX0Vr9Z4" />
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
