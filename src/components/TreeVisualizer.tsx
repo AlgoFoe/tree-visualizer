@@ -3,6 +3,7 @@ import insertAVL from "@/utils/avlTree";
 import insertBST from "@/utils/binarySearchTree";
 import buildBinaryTree from "@/utils/binaryTree";
 import insertHeap from "@/utils/heapTree";
+import insertRedBlackTree from "@/utils/rbTree";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Stage, Layer, Circle, Line, Text } from "react-konva";
 import Konva from 'konva';
@@ -29,6 +30,26 @@ type AVLTreeNode = {
   highlight: boolean;
 };
 
+type RBTreeNode = {
+  value: number;
+  left: RBTreeNode | null;
+  right: RBTreeNode | null;
+  color: 'R' | 'B';
+  parent: RBTreeNode | null;
+  x: number;
+  y: number;
+  highlight: boolean;
+};
+
+interface Tree {
+  heap: boolean;
+  bst: boolean;
+  avl: boolean;
+  bt: boolean;
+  rbt: boolean;
+}
+
+
 const TreeVisualizer: React.FC = () => {
     const stageRef = useRef<Konva.Stage | null>(null);
   const [canvasSize, setCanvasSize] = useState({
@@ -43,11 +64,31 @@ const TreeVisualizer: React.FC = () => {
     avl: false,
     heap: false,
     bt: false,
+    rbt: false,
   });
   const [rotation, setRotation] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 }); // tracking stage position for panning 
 
+  const startProcess = (tree:Tree) => {
+    setPressed((prevPressed) => ({
+      ...prevPressed,
+       heap: tree.heap,
+       bst: tree.bst,
+       avl: tree.avl,
+       bt: tree.bt,
+       rbt: tree.rbt,
+     }));
+     const values = inputValue.split(",").map((value) => parseInt(value.trim()));
+     if (values.some((value) => isNaN(value))) {
+      toast.error("Not a number", {
+        duration: 4000,
+        position: "top-center",
+      });
+      return [];
+    }
+     return values
+  }
   const resetHighlight = useCallback((node: Node | null) => {
     if (node) {
       node.highlight = false;
@@ -61,19 +102,13 @@ const TreeVisualizer: React.FC = () => {
   };
   // BST
   const handleBST = () => {
-    setPressed((prevPressed) => ({
-      ...prevPressed,
+    const values = startProcess({
       heap: false,
       bst: true,
       avl: false,
       bt: false,
-    }));
-    const values = inputValue.split(",").map((value) => parseInt(value.trim()));
-
-    if (values.some((value) => isNaN(value))) {
-      toast.error("Not a number", { duration: 4000, position: "top-center" });
-      return;
-    }
+      rbt: false,
+    });
 
     let newBinaryTree: Node | null = null;
     values.forEach((value) => {
@@ -83,22 +118,13 @@ const TreeVisualizer: React.FC = () => {
   };
   // BT
   const handleBT = () => {
-    setPressed((prevPressed) => ({
-      ...prevPressed,
+    const values = startProcess({
       heap: false,
       bst: false,
       avl: false,
       bt: true,
-    }));
-    const values = inputValue.split(",").map((value) => parseInt(value.trim()));
-
-    if (values.some((value) => isNaN(value))) {
-      toast.error("Not a number", {
-        duration: 4000,
-        position: "top-center",
-      });
-      return;
-    }
+      rbt: false,
+    });
 
     const newBinaryTree = buildBinaryTree(values);
     setBinaryTree(newBinaryTree);
@@ -106,22 +132,13 @@ const TreeVisualizer: React.FC = () => {
 
   // AVLT
   const handleAVLT = () => {
-    setPressed((prevPressed) => ({
-      ...prevPressed,
+    const values = startProcess({
       heap: false,
       bst: false,
       avl: true,
       bt: false,
-    }));
-    const values = inputValue.split(",").map((value) => parseInt(value.trim()));
-
-    if (values.some((value) => isNaN(value))) {
-      toast.error("Not a number", {
-        duration: 4000,
-        position: "top-center",
-      });
-      return;
-    }
+      rbt: false,
+    });
 
     let newAVLTree: AVLTreeNode | null = null;
     values.forEach((value) => {
@@ -141,22 +158,13 @@ const TreeVisualizer: React.FC = () => {
   };
   // HeapT
   const handleHeapT = () => {
-    setPressed((prevPressed) => ({
-      ...prevPressed,
+    const values = startProcess({
       heap: true,
       bst: false,
       avl: false,
       bt: false,
-    }));
-    const values = inputValue.split(",").map((value) => parseInt(value.trim()));
-
-    if (values.some((value) => isNaN(value))) {
-      toast.error("Not a number", {
-        duration: 4000,
-        position: "top-center",
-      });
-      return;
-    }
+      rbt: false,
+    });
 
     let newHeapTree: Node[] = [];
     values.forEach((value) => {
@@ -164,7 +172,24 @@ const TreeVisualizer: React.FC = () => {
     });
     setBinaryTree(buildBinaryTreeFromArray(newHeapTree));
   };
-
+  const handleRBTree = () => {
+    const values = startProcess({
+      heap: false,
+      bst: false,
+      avl: false,
+      bt: false,
+      rbt: true,
+    });
+  
+    let newRBTree: RBTreeNode | null = null;
+    values.forEach((value) => {
+      newRBTree = insertRedBlackTree(newRBTree, value);
+    });
+    if (newRBTree) {
+      setBinaryTree(newRBTree);
+    }
+  };
+   
   const calculateSubtreeWidth = (node: Node | null): number => {
     if (node === null) return 0;
     const leftWidth = calculateSubtreeWidth(node.left);
@@ -179,23 +204,24 @@ const TreeVisualizer: React.FC = () => {
       y: number,
       levelHeight: number,
       subtreeWidth: number
-    ):JSX.Element[]=> {
+    ): JSX.Element[] => {
       if (!node) return [];
-
+  
       node.x = x;
       node.y = y;
-
+  
       const radius = 25 * zoomLevel;
       const elements = [];
-
-      // Add the current node (circle + text)
+  
+      const nodeColor = (node as RBTreeNode).color === "R" ? "red" : "black";
+  
       elements.push(
         <Circle
           key={`circle-${node.value}`}
           x={x}
           y={y}
           radius={radius}
-          fill={node.highlight ? "#3ab1cf" : "#193145"}
+          fill={node.highlight ? "#3ab1cf" : nodeColor}
           stroke="#3a9bf0"
           strokeWidth={2}
         />
@@ -209,23 +235,22 @@ const TreeVisualizer: React.FC = () => {
           fontSize={20 * zoomLevel}
           fill="white"
           scaleX={zoomLevel}
-          scaleY={zoomLevel} // dynamic resizing
+          scaleY={zoomLevel} 
         />
       );
-
+  
       const leftSubtreeWidth = calculateSubtreeWidth(node.left);
       const rightSubtreeWidth = calculateSubtreeWidth(node.right);
-
+  
       const maxSubtreeWidth = Math.max(leftSubtreeWidth, rightSubtreeWidth);
       const totalSubtreeWidth = maxSubtreeWidth * 2 + 1;
-
+  
       if (node.left !== null) {
         // x-coordinate for the left child based on the maximum width
-        const leftX =
-          x - (subtreeWidth / totalSubtreeWidth) * maxSubtreeWidth * 50;
+        const leftX = x - (subtreeWidth / totalSubtreeWidth) * maxSubtreeWidth * 50;
         const leftY = y + levelHeight;
-
-        // add a line from the parent node to the left child
+  
+        // Add a line from the parent node to the left child
         elements.push(
           <Line
             key={`line-left-${node.value}`}
@@ -234,24 +259,17 @@ const TreeVisualizer: React.FC = () => {
             strokeWidth={2}
           />
         );
-
+  
         elements.push(
-          ...drawBinaryTree(
-            node.left,
-            leftX,
-            leftY,
-            levelHeight,
-            leftSubtreeWidth
-          )
+          ...drawBinaryTree(node.left, leftX, leftY, levelHeight, leftSubtreeWidth)
         );
       }
-
+  
       if (node.right !== null) {
         // x-coordinate for the right child based on the maximum width
-        const rightX =
-          x + (subtreeWidth / totalSubtreeWidth) * maxSubtreeWidth * 50;
+        const rightX = x + (subtreeWidth / totalSubtreeWidth) * maxSubtreeWidth * 50;
         const rightY = y + levelHeight;
-
+  
         // Add the line from the parent node to the right child
         elements.push(
           <Line
@@ -261,23 +279,19 @@ const TreeVisualizer: React.FC = () => {
             strokeWidth={2}
           />
         );
-
+  
         elements.push(
-          ...drawBinaryTree(
-            node.right,
-            rightX,
-            rightY,
-            levelHeight,
-            rightSubtreeWidth
-          )
+          ...drawBinaryTree(node.right, rightX, rightY, levelHeight, rightSubtreeWidth)
         );
       }
-
+  
       return elements;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [zoomLevel]
   );
+  
+  
   let lastDist = 0;
 
   const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
@@ -388,27 +402,10 @@ const TreeVisualizer: React.FC = () => {
           />
           <div className="flex gap-2 justify-center mt-2 flex-wrap">
             <div
-              onClick={handleBST}
-              className={`${
-                pressed.bst ? "bg-teal-600" : "bg-blue-500"
-              } button w-16 h-10 rounded-lg cursor-pointer select-none
-            active:translate-y-2 active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
-            active:border-b-[0px]
-            transition-all duration-150 ${pressed.bst && "translate-y-2"} ${
-                !pressed.bst &&
-                "[box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841]"
-              }
-            border-b-[1px] border-blue-400`}
-            >
-              <span className="flex flex-col justify-center items-center h-full text-white font-bold text-lg">
-                BST
-              </span>
-            </div>
-            <div
               onClick={handleBT}
               className={`${
                 pressed.bt ? "bg-teal-600" : "bg-blue-500"
-              }  button w-16 h-10 rounded-lg cursor-pointer select-none
+              }  button p-2 min-w-fit h-10 rounded-lg cursor-pointer select-none
             active:translate-y-2  active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
             active:border-b-[0px]
             transition-all duration-150 ${pressed.bt && "translate-y-2"} ${
@@ -418,14 +415,31 @@ const TreeVisualizer: React.FC = () => {
             border-b-[1px] border-blue-400`}
             >
               <span className="flex flex-col justify-center items-center h-full text-white font-bold text-lg ">
-                BT
+                Binary Tree
+              </span>
+            </div>
+            <div
+              onClick={handleBST}
+              className={`${
+                pressed.bst ? "bg-teal-600" : "bg-blue-500"
+              } button p-2 min-w-fit h-10 rounded-lg cursor-pointer select-none
+            active:translate-y-2 active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+            active:border-b-[0px]
+            transition-all duration-150 ${pressed.bst && "translate-y-2"} ${
+                !pressed.bst &&
+                "[box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841]"
+              }
+            border-b-[1px] border-blue-400`}
+            >
+              <span className="flex flex-col justify-center items-center h-full text-white font-bold text-lg">
+                Binary Search Tree
               </span>
             </div>
             <div
               onClick={handleAVLT}
               className={`${
                 pressed.avl ? "bg-teal-600" : "bg-blue-500"
-              }  button w-16 h-10 rounded-lg cursor-pointer select-none
+              }  button p-2 min-w-fit h-10 rounded-lg cursor-pointer select-none
             active:translate-y-2  active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
             active:border-b-[0px]
             transition-all duration-150 ${pressed.avl && "translate-y-2"} ${
@@ -435,21 +449,35 @@ const TreeVisualizer: React.FC = () => {
             border-b-[1px] border-blue-400`}
             >
               <span className="flex flex-col justify-center items-center h-full text-white font-bold text-lg ">
-                AVL T
+                Avl Tree
               </span>
             </div>
             <div
             onClick={handleHeapT}
             className={`${
               pressed.heap ? "bg-teal-600" : "bg-blue-500"
-            }  button w-16 h-10 rounded-lg cursor-pointer select-none
+            }  button p-2 min-w-fit h-10 rounded-lg cursor-pointer select-none
             active:translate-y-2  active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
             active:border-b-[0px]
             transition-all duration-150 ${pressed.heap && 'translate-y-2'} ${!pressed.heap && '[box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841]'}
             border-b-[1px] border-blue-400`}
           >
             <span className="flex flex-col justify-center items-center h-full text-white font-bold text-lg ">
-              Heap T
+              Heap Tree
+            </span>
+          </div>
+          <div
+            onClick={handleRBTree}
+            className={`${
+              pressed.rbt ? "bg-teal-600" : "bg-blue-500"
+            }  button mt-2 p-2 min-w-fit h-10 rounded-lg cursor-pointer select-none
+            active:translate-y-2  active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+            active:border-b-[0px]
+            transition-all duration-150 ${pressed.rbt && 'translate-y-2'} ${!pressed.rbt && '[box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841]'}
+            border-b-[1px] border-blue-400`}
+          >
+            <span className="flex flex-col justify-center items-center h-full text-white font-bold text-lg ">
+              Red Black Tree
             </span>
           </div>
           </div>
