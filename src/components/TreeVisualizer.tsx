@@ -8,8 +8,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Stage, Layer, Circle, Line, Text } from "react-konva";
 import Konva from 'konva';
 import { KonvaEventObject } from "konva/lib/Node";
-import { PiDeviceRotateDuotone } from "react-icons/pi";
+import { HiMiniDevicePhoneMobile } from "react-icons/hi2";
 import toast from "react-hot-toast";
+import { MdTouchApp } from "react-icons/md";
 
 type Node = {
   value: number;
@@ -369,9 +370,8 @@ const TreeVisualizer: React.FC = () => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    const width = Math.max(windowWidth, treeWidth); 
-    const height = windowHeight; 
-
+    const width = Math.max(windowWidth, treeWidth)/2; 
+    const height = windowHeight;  
     setCanvasSize({ width, height });
   }, [treeWidth]);
 
@@ -385,7 +385,7 @@ const TreeVisualizer: React.FC = () => {
 
   useEffect(() => {
     calculateCanvasSize();
-    window.addEventListener("resize", calculateCanvasSize); // Recalculate canvas size on window resize
+    window.addEventListener("resize", calculateCanvasSize); 
     return () => window.removeEventListener("resize", calculateCanvasSize);
   }, [calculateCanvasSize]);
 
@@ -458,7 +458,7 @@ const TreeVisualizer: React.FC = () => {
               pressed.heap ? "bg-teal-600" : "bg-blue-500"
             }  button p-2 min-w-fit h-10 rounded-lg cursor-pointer select-none
             active:translate-y-2  active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
-            active:border-b-[0px]
+            active:border-b-[0px] 
             transition-all duration-150 ${pressed.heap && 'translate-y-2'} ${!pressed.heap && '[box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841]'}
             border-b-[1px] border-blue-400`}
           >
@@ -484,20 +484,21 @@ const TreeVisualizer: React.FC = () => {
           <div className="flex gap-2 justify-center mt-4 flex-wrap">
             <button
               onClick={() => setRotation(rotation === 0 ? 90 : 0)}
-              className="button w-20 h-10 bg-rose-500 rounded-lg cursor-pointer select-none active:translate-y-2 transition-all duration-150"
+              className="button min-w-fit h-10 bg-rose-500 rounded-lg cursor-pointer select-none active:translate-y-2 transition-all duration-150 p-2"
             >
               <span className="flex justify-center items-center h-full text-white font-bold text-sm">
+                <span className="pr-2">Rotate for mobile view </span>
                 <span>
-                  <PiDeviceRotateDuotone className="w-5 h-5 " />
+                  <HiMiniDevicePhoneMobile className="w-5 h-5" />
                 </span>
-                <span className="">Rotate</span>
               </span>
             </button>
           </div>
         </div>
       </div>
+      
       <div
-        className="mt-8 overflow-auto border border-black sm:-ml-8"
+        className="mt-8 md:ml-10 lg:ml-20 overflow-hidden border-2 rounded-lg border-sky-600 sm:-ml-2"
         style={{
           width:
             window.innerWidth > 768
@@ -506,6 +507,10 @@ const TreeVisualizer: React.FC = () => {
           height: `calc(100vh - 150px)`, // Fixed height with padding
         }}
       >
+        <span className="flex justify-end gap-1 items-end p-1 bg-gradient-to-b from-slate-300 select-none">
+          <span><MdTouchApp className="w-6 h-6 text-gray-700" /></span>
+          <span className="font-bold text-gray-700 text-sm">Drag to move</span>
+        </span>
         <Stage
           ref={stageRef}
           width={canvasSize.width}
