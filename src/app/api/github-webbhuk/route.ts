@@ -5,6 +5,7 @@ export async function POST(req: NextRequest) {
     const payload = await req.json();
     const event = req.headers.get('x-github-event');
     console.log({"Event" : event,"Payload" : payload});
+    console.log("Pusher details : ",payload.pusher);
     switch (event) {
       case 'push':
         console.log(`Push event: ${payload.head_commit?.message} by ${payload.pusher?.name}`);
