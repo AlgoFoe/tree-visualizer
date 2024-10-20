@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
-
-const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
 
 let starsCount = 0;
 let forksCount = 0;
@@ -13,7 +10,24 @@ type CommitInfo = {
 };
 
 const recentCommits: CommitInfo[] = [];
+const sseClients: TransformStream[] = [];
 
+type SSEData =
+  | { type: 'stars'; count: number }
+  | { type: 'forks'; count: number }
+  | { type: 'recentCommits'; commits: CommitInfo[] };
+
+// broadcast data to all clients
+const broadcastToClients = (data: SSEData) => {
+  const message = `data: ${JSON.stringify(data)}\n\n`;
+  sseClients.forEach((client) => {
+    const writer = client.writable.getWriter();
+    writer.write(new TextEncoder().encode(message));
+    writer.close();
+  });
+};
+
+// handle github webhook events
 export async function POST(req: NextRequest) {
   try {
     const payload = await req.json();
@@ -26,8 +40,6 @@ export async function POST(req: NextRequest) {
         const commitAuthor = payload.pusher?.name;
         const commitTimestamp = payload.head_commit?.timestamp;
 
-        console.log(`Push event: ${commitMessage} by ${commitAuthor}`);
-
         if (commitMessage && commitAuthor && commitTimestamp) {
           recentCommits.unshift({
             message: commitMessage,
@@ -36,6 +48,8 @@ export async function POST(req: NextRequest) {
           });
 
           if (recentCommits.length > 5) recentCommits.pop();
+
+          broadcastToClients({ type: 'recentCommits', commits: recentCommits });
         }
         break;
 
@@ -45,8 +59,6 @@ export async function POST(req: NextRequest) {
           const prAuthor = payload.pull_request?.user?.login;
           const prMergedAt = payload.pull_request?.merged_at;
 
-          console.log(`PR merged: ${prTitle} by ${prAuthor}`);
-
           if (prTitle && prAuthor && prMergedAt) {
             recentCommits.unshift({
               message: `PR merged: ${prTitle}`,
@@ -55,18 +67,20 @@ export async function POST(req: NextRequest) {
             });
 
             if (recentCommits.length > 5) recentCommits.pop();
+
+            broadcastToClients({ type: 'recentCommits', commits: recentCommits });
           }
         }
         break;
 
       case 'watch':
-        console.log(`New star by: ${payload.sender?.login}`);
         starsCount += 1;
+        broadcastToClients({ type: 'stars', count: starsCount });
         break;
 
       case 'fork':
-        console.log(`Repository forked by: ${payload.forkee?.owner?.login}`);
         forksCount += 1;
+        broadcastToClients({ type: 'forks', count: forksCount });
         break;
 
       default:
@@ -80,28 +94,25 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// my SSE endpoint for real-time updates
 export async function GET() {
-  try {
-    const { data: repoData } = await axios.get(GITHUB_API_URL);
+  const { readable, writable } = new TransformStream();
+  sseClients.push({ readable, writable });
 
-    const stars = repoData.stargazers_count || starsCount;
-    const forks = repoData.forks_count || forksCount;
+  const encoder = new TextEncoder();
+  const initData = [
+    encoder.encode(`data: ${JSON.stringify({ type: 'stars', count: starsCount })}\n\n`),
+    encoder.encode(`data: ${JSON.stringify({ type: 'forks', count: forksCount })}\n\n`),
+    encoder.encode(`data: ${JSON.stringify({ type: 'recentCommits', commits: recentCommits })}\n\n`),
+  ];
 
-    return NextResponse.json({
-      stars,
-      forks,
-      recentCommits,
-    });
-  } catch (error) {
-    console.error('Error fetching GitHub data:', error);
+  initData.forEach((data) => writable.getWriter().write(data));
 
-    return NextResponse.json(
-      {
-        stars: starsCount,
-        forks: forksCount,
-        recentCommits,
-      },
-      { status: 200 }
-    );
-  }
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
 }
