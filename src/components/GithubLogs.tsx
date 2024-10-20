@@ -152,52 +152,132 @@
 // };
 
 // export default GithubLogs;
-
 "use client";
 import React, { useState, useEffect } from "react";
 import { FaStar, FaCodeBranch, FaDonate, FaGithub } from "react-icons/fa";
-import axios from "axios";
+import { createClient, RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import Link from "next/link";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 type RecentCommit = {
-  message: string;  
+  message: string;
   author: string;
   timestamp: string;
 };
 
-const API_URL = "https://tree-visualizer-six-nine.vercel.app/api/github-webbhuk";
+type StatsPayload = {
+  type: string;
+  count: number;
+};
+
 const DONATION_LINK = "https://payment-link.vercel.app";
 
 const GithubLogs: React.FC = () => {
-  const [stars, setStars] = useState(0);
-  const [forks, setForks] = useState(0);
+  const [stars, setStars] = useState<number>(0);
+  const [forks, setForks] = useState<number>(0);
   const [recentCommits, setRecentCommits] = useState<RecentCommit[]>([]);
   const topDonors = [
     { name: "Varun Singh", amount: "₹1200", message: "Loved to contribute" },
     { name: "Ben Dover", amount: "₹1000", message: "God's work" },
   ];
 
-  useEffect(() => {
-    fetchRepoStats();
-  }, []);
-
-  const fetchRepoStats = async () => {
+  const fetchInitialData = async () => {
     try {
-      const { data } = await axios.get(API_URL);
-      setStars(data.stars || 0);
-      setForks(data.forks || 0);
-      setRecentCommits(data.recentCommits || []);
+      const { data: statsData } = await supabase.from("stats").select("type, count");
+      const { data: commitsData } = await supabase
+        .from("commits")
+        .select("message, author, timestamp")
+        .order("timestamp", { ascending: false })
+        .limit(5);
+
+      const starsData = statsData?.find((item): item is StatsPayload => item.type === "stars");
+      const forksData = statsData?.find((item): item is StatsPayload => item.type === "forks");
+
+      setStars(starsData?.count || 0);
+      setForks(forksData?.count || 0);
+      setRecentCommits(commitsData || []);
     } catch (error) {
-      console.error("Failed to fetch GitHub data from API", error);
+      console.error("Error fetching initial data:", error);
     }
   };
+
+  useEffect(() => {
+    console.log("SUPABASE_KEYS : ",SUPABASE_URL,SUPABASE_ANON_KEY)
+    fetchInitialData();
+
+    const statsSubscription = supabase
+      .channel("realtime:public:stats")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "stats" },
+        (payload: RealtimePostgresChangesPayload<StatsPayload>) => {
+          if (payload.eventType === "UPDATE" && isStatsPayload(payload.new)) {
+            if (payload.new.type === "stars") {
+              setStars(payload.new.count);
+            } else if (payload.new.type === "forks") {
+              setForks(payload.new.count);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    const commitsSubscription = supabase
+      .channel("realtime:public:commits")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "commits" },
+        (payload: RealtimePostgresChangesPayload<RecentCommit>) => {
+          if (payload.eventType === "INSERT" && isRecentCommit(payload.new)) {
+            setRecentCommits((prevCommits) => [
+              payload.new,
+              ...prevCommits.slice(0, 4),
+            ]);
+          }
+        }
+      )
+      .subscribe();
+
+    // Clean up subscriptions on component unmount
+    return () => {
+      supabase.removeChannel(statsSubscription);
+      supabase.removeChannel(commitsSubscription);
+    };
+  }, []);
+
+  // type-guard for StatsPayload
+  function isStatsPayload(obj: unknown): obj is StatsPayload {
+    return (
+      typeof obj === "object" &&
+      obj !== null &&
+      "type" in obj &&
+      "count" in obj &&
+      typeof (obj as StatsPayload).type === "string" &&
+      typeof (obj as StatsPayload).count === "number"
+    );
+  }
+
+  // type-guard for RecentCommit
+  function isRecentCommit(obj: unknown): obj is RecentCommit {
+    return (
+      typeof obj === "object" &&
+      obj !== null &&
+      "message" in obj &&
+      "author" in obj &&
+      "timestamp" in obj &&
+      typeof (obj as RecentCommit).message === "string" &&
+      typeof (obj as RecentCommit).author === "string" &&
+      typeof (obj as RecentCommit).timestamp === "string"
+    );
+  }
 
   return (
     <div className="flex flex-col p-4 text-white h-full">
       <div className="flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md mb-4">
-        <h2 className="text-lg font-bold text-emerald-400">
-          TreeVisualizer Repo Stats
-        </h2>
+        <h2 className="text-lg font-bold text-emerald-400">TreeVisualizer Repo Stats</h2>
         <div className="flex items-center justify-between w-full mt-2">
           <div className="flex items-center gap-2">
             <FaStar className="text-yellow-400" />
@@ -213,28 +293,24 @@ const GithubLogs: React.FC = () => {
             rel="noopener noreferrer"
             className="text-sky-400 font-bold"
           >
-           <div className="flex items-center justify-center gap-2 bg-gray-700 rounded-lg p-1 hover:bg-gray-600">
-            <span>Contribute now </span>
-            <span><FaGithub /></span> 
-           </div>
+            <div className="flex items-center justify-center gap-2 bg-gray-700 rounded-lg p-1 hover:bg-gray-600">
+              <span>Contribute now</span>
+              <span>
+                <FaGithub />
+              </span>
+            </div>
           </Link>
         </div>
       </div>
 
       <div className="bg-gray-900 rounded-lg shadow-md p-3">
-        <h2 className="text-lg font-bold mb-2 text-emerald-400">
-          Recent Commits
-        </h2>
+        <h2 className="text-lg font-bold mb-2 text-emerald-400">Recent Commits</h2>
         <div className="space-y-2 overflow-auto h-40">
           {recentCommits.length > 0 ? (
             recentCommits.map((commit, index) => (
-              <div
-                key={index}
-                className="flex flex-col p-2 bg-gray-800 rounded-lg shadow-sm"
-              >
+              <div key={index} className="flex flex-col p-2 bg-gray-800 rounded-lg shadow-sm">
                 <p className="text-sm">
-                  <span className="font-bold">{commit.author}</span> -{" "}
-                  {commit.message}
+                  <span className="font-bold">{commit.author}</span> - {commit.message}
                 </p>
                 <p className="text-xs text-gray-400">
                   {new Date(commit.timestamp).toLocaleString()}
@@ -257,9 +333,7 @@ const GithubLogs: React.FC = () => {
                 <p className="font-bold">
                   {index + 1}. {donor.name}
                 </p>
-                <p className="text-xs text-gray-400">
-                  message - {donor.message}
-                </p>
+                <p className="text-xs text-gray-400">message - {donor.message}</p>
               </div>
               <span className="text-cyan-400 font-bold">{donor.amount}</span>
             </div>
