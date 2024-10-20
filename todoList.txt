@@ -3,3 +3,4 @@ Canvas :
     - Scroll back to content
 Payments :
     - tree plantation payments page
+    - checkout few SDKs

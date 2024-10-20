@@ -160,7 +160,7 @@ import axios from "axios";
 import Link from "next/link";
 
 type RecentCommit = {
-  message: string;
+  message: string;  
   author: string;
   timestamp: string;
 };
