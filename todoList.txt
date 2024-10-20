@@ -4,3 +4,4 @@ Canvas :
 Payments :
     - tree plantation payments page
     - checkout few SDKs
+    - maybe a upi code
