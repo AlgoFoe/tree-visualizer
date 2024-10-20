@@ -3,10 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 
 // configuring supabase
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+console.log("URL : ",SUPABASE_URL);
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
 
 export async function POST(req: NextRequest) {

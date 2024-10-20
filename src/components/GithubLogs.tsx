@@ -158,7 +158,7 @@ import { FaStar, FaCodeBranch, FaDonate, FaGithub } from "react-icons/fa";
 import { createClient, RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import Link from "next/link";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
