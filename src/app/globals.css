@@ -8,26 +8,24 @@
 }
 
 ::-webkit-scrollbar {
-  height:3px;
-	width: 3px;
+  height:8px;
+	width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #306fc2;
-  border-radius: 3px;
+  background: #51c4f5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #51c4f5;
-	border-radius: 3px;
+  background: #306fc2;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: #9feef5;
+	background: #0d5c94;
 }
 
 ::-webkit-scrollbar-thumb:focus {
-	background: #9feef5;
+	background: #0d5c94;
 }
 
 @media (prefers-color-scheme: dark) {
