@@ -159,7 +159,7 @@ import { createClient, RealtimePostgresChangesPayload } from "@supabase/supabase
 import Link from "next/link";
 
 const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzamdoeXZ5ZGdhZGlvaGJhb2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0MjQxNDksImV4cCI6MjA0NTAwMDE0OX0.MIIt_s7sQbzvOGfV7pUbAXiSVubutoFn9-sPDqKrevE";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 type RecentCommit = {

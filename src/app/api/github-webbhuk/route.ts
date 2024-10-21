@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // configuring supabase
 const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzamdoeXZ5ZGdhZGlvaGJhb2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyOTQyNDE0OSwiZXhwIjoyMDQ1MDAwMTQ5fQ.m6ahlj5ItQli2o-6X-nArttJx2ENYxUi_Ta9AMuoWLc";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 console.log("URL : ",SUPABASE_URL);
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
