@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const payload = await req.json();
     const event = req.headers.get('x-github-event');
 
-    console.log({ Event: event, Payload: payload });
+    console.log("Payload : ", payload);
 
     switch (event) {
       case 'watch':
