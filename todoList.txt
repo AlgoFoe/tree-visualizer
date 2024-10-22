@@ -1,6 +1,8 @@
 Canvas : 
     - Zoom in / out limits
     - Scroll back to content
+Github logs:
+    - to get current deployment status we fetch latest [0] deployments state 
 Payments :
     - tree plantation payments page
     - checkout few SDKs
