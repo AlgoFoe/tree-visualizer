@@ -122,17 +122,19 @@ const GithubLogs: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col p-4 text-white h-full">
-      <div className="flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md mb-4">
+    <div className="flex flex-col p-4 text-white h-full font-mono selection:bg-green-700">
+      <div className="p-4 bg-gray-800 rounded-lg shadow-md mb-4">
         <h2 className="text-lg font-bold text-emerald-400">TreeVisualizer Repo Stats</h2>
-        <div className="flex items-center justify-between w-full mt-2">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 justify-between mt-2 overflow-hidden">
+          <div className="flex items-center gap-1 justify-center"> 
             <FaStar className="text-yellow-400" />
-            <span>Stars: {stars}</span>
+            <span>Stars: </span>
+            <span>{stars}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <FaCodeBranch className="text-cyan-400" />
-            <span>Forks: {forks}</span>
+            <span>Forks: </span>
+            <span>{forks}</span>
           </div>
           <Link
             href="https://github.com/AlgoFoe/tree-visualizer"
@@ -140,8 +142,9 @@ const GithubLogs: React.FC = () => {
             rel="noopener noreferrer"
             className="text-sky-400 font-bold"
           >
-            <div className="flex items-center justify-center gap-2 bg-gray-700 rounded-lg p-1 hover:bg-gray-600">
-              <span>Contribute now</span>
+            <div className="flex items-center justify-center gap-2 bg-gray-700 rounded-lg p-1.5 hover:bg-gray-600">
+              <span className="block max-xl:hidden">Contribute now</span>
+              <span className="hidden max-xl:block max-lg:hidden">Visit</span>
               <span>
                 <FaGithub />
               </span>
@@ -158,7 +161,7 @@ const GithubLogs: React.FC = () => {
               <RecentCommit key={index} commit={commit} index={index} />
             ))
           ) : (
-            <p className="text-gray-500">No recent commits</p>
+            <p className="text-slate-400">No recent commits</p>
           )}
         </div>
       </div>
