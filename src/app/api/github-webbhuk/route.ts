@@ -43,9 +43,6 @@ export async function POST(req: NextRequest) {
           message: commitMessage,
           author: commitAuthor,
           timestamp: commitTimestamp,
-          status: 'default', 
-          branch: payload.ref?.replace('refs/heads/', '') || 'unknown',
-          avatar_url: payload.sender?.avatar_url,
         });
         if (commitMessage && commitAuthor && commitTimestamp) {
           await supabase.from('commits').insert([
@@ -53,9 +50,6 @@ export async function POST(req: NextRequest) {
               message: commitMessage,
               author: commitAuthor,
               timestamp: commitTimestamp,
-              status: 'default', 
-              branch: payload.ref?.replace('refs/heads/', '') || 'unknown',
-              avatar_url: payload.sender?.avatar_url,
             },
           ]);
         }
@@ -74,45 +68,10 @@ export async function POST(req: NextRequest) {
                 message: `PR merged: ${prTitle}`,
                 author: prAuthor,
                 timestamp: prMergedAt,
-                status: 'default',
-                branch: payload.pull_request?.base?.ref || 'unknown',
-                avatar_url: payload.pull_request?.user?.avatar_url,
               },
             ]);
           }
         }
-        break;
-      }
-      case 'status':{
-        const commitSha = payload.commit?.sha;
-        const statusState = payload.state;
-        const commitMessage = payload.commit?.commit?.message;
-        const commitAuthor = payload.commit?.author?.login;
-        const commitTimestamp = payload.commit?.commit?.author?.date;
-        const branchName = payload.branches?.[0]?.name || 'unknown';
-        const avatarUrl = payload.commit?.author?.avatar_url;
-
-        let statusColor = 'default';
-        if (statusState === 'pending') statusColor = 'orange';
-        if (statusState === 'success') statusColor = 'green';
-
-        if (commitSha) {
-          await supabase
-            .from('commits')
-            .upsert(
-              {
-                message: commitMessage,
-                author: commitAuthor,
-                timestamp: commitTimestamp,
-                status: statusColor,
-                branch: branchName,
-                avatar_url: avatarUrl,
-                sha: commitSha,
-              },
-              { onConflict: 'sha' }
-            );
-        }
-        
         break;
       }
       default:
