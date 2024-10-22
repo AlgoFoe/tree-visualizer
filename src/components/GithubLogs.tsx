@@ -163,7 +163,7 @@ const GithubLogs: React.FC = () => {
               <div
                 key={index}
                 className={`flex flex-col p-2 bg-gray-800 rounded-lg shadow-sm ${
-                  commit.status === "pending" ? "text-orange-500" : commit.status === "success" ? "text-green-500" : ""
+                  commit.status === "orange" ? "text-orange-500" : commit.status === "green" ? "text-green-500" : ""
                 }`}
               >
                 <div className="flex items-center gap-2">
