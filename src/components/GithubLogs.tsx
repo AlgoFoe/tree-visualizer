@@ -75,47 +75,57 @@ const GithubLogs: React.FC = () => {
       )
       .subscribe();
 
-    const commitsSubscription = supabase
+      const commitsSubscription = supabase
       .channel("realtime:public:commits")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "commits" },
         (payload: RealtimePostgresChangesPayload<RecentCommit>) => {
-          if ((payload.eventType === "INSERT" || payload.eventType === "UPDATE") && isRecentCommit(payload.new)) {
+          if (payload.eventType === "INSERT" && payload.new) {
+            
+            // insert new commit with default color
             setRecentCommits((prevCommits) => [
-              payload.new,
+              { ...payload.new, color: payload.new.color || 'text-slate-300' },
               ...prevCommits.slice(0, 4),
             ]);
-          }
-        }
-      )
-      .subscribe();
-
-    const deploymentsSubscription = supabase
-     .channel("realtime:public:deployments")
-     .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "deployments" },
-        (payload: RealtimePostgresChangesPayload<{sha:string;state:string}>)=>{
-          if(payload.eventType === "INSERT" || payload.eventType === "UPDATE"){
-            const newColor = 
-            payload.new.state === 'QUEUED' || 'BUILDING' ? 'text-yellow-700' :
-            payload.new.state === 'READY' ? 'text-green-500' :
-            'text-red-300';
-            setRecentCommits((prevCommits)=>
-              prevCommits.map((commit)=>
-                commit.sha === payload.new.sha? {...commit,color : newColor}:commit  
+          } else if (payload.eventType === "UPDATE" && payload.new) {
+            
+            // update commit color based on new state
+            setRecentCommits((prevCommits) =>
+              prevCommits.map((commit) =>
+                commit.sha === payload.new.sha ? { ...commit, color: payload.new.color } : commit
               )
             );
           }
         }
       )
       .subscribe();
+
+    // const deploymentsSubscription = supabase
+    //  .channel("realtime:public:deployments")
+    //  .on(
+    //     "postgres_changes",
+    //     { event: "*", schema: "public", table: "deployments" },
+    //     (payload: RealtimePostgresChangesPayload<{sha:string;state:string}>)=>{
+    //       if(payload.eventType === "INSERT" || payload.eventType === "UPDATE"){
+    //         const newColor = 
+    //         payload.new.state === 'QUEUED' || 'BUILDING' ? 'text-yellow-700' :
+    //         payload.new.state === 'READY' ? 'text-green-500' :
+    //         'text-red-300';
+    //         setRecentCommits((prevCommits)=>
+    //           prevCommits.map((commit)=>
+    //             commit.sha === payload.new.sha? {...commit,color : newColor}:commit  
+    //           )
+    //         );
+    //       }
+    //     }
+    //   )
+    //   .subscribe();
     // Clean up subscriptions on component unmount
     return () => {
       supabase.removeChannel(statsSubscription);
       supabase.removeChannel(commitsSubscription);
-      supabase.removeChannel(deploymentsSubscription);
+      // supabase.removeChannel(deploymentsSubscription);
     };
   }, []);
 
@@ -132,18 +142,18 @@ const GithubLogs: React.FC = () => {
   }
 
   // type-guard for RecentCommit
-  function isRecentCommit(obj: unknown): obj is RecentCommit {
-    return (
-      typeof obj === "object" &&
-      obj !== null &&
-      "message" in obj &&
-      "author" in obj &&
-      "timestamp" in obj &&
-      typeof (obj as RecentCommit).message === "string" &&
-      typeof (obj as RecentCommit).author === "string" &&
-      typeof (obj as RecentCommit).timestamp === "string"
-    );
-  }
+  // function isRecentCommit(obj: unknown): obj is RecentCommit {
+  //   return (
+  //     typeof obj === "object" &&
+  //     obj !== null &&
+  //     "message" in obj &&
+  //     "author" in obj &&
+  //     "timestamp" in obj &&
+  //     typeof (obj as RecentCommit).message === "string" &&
+  //     typeof (obj as RecentCommit).author === "string" &&
+  //     typeof (obj as RecentCommit).timestamp === "string"
+  //   );
+  // }
 
   return (
     <div className="flex flex-col p-4 text-white h-full font-mono selection:bg-green-700">
