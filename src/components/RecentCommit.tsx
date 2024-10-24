@@ -7,9 +7,7 @@ interface Commit {
   timestamp: string;
   color: string;
 }
-// committer's name: commit.author 
-// commit message: commit.message
-// commit date and time: commit.timestamp
+
 const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
   commit,
   index,
@@ -17,9 +15,9 @@ const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
   console.log("Commit color: "+ commit.color+" commit message: "+ commit.message);
   return (
     <div key={index} className="flex p-1.5 bg-gray-800 rounded-lg shadow-md min-w-fit">
-      <div className={`flex flex-col ${commit.color}`}>
+      <div className="flex flex-col text-slate-300">
         <div className="flex gap-1">
-            <FiGitCommit className="w-6 h-6 text-green-500 text-yellow-600" />
+            <FiGitCommit className={`w-6 h-6 ${commit.color}`} />
             <p className="overflow-hidden w-64 text-ellipsis">{commit.message}</p>
         </div>
         <div className="flex gap-2">
