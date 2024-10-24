@@ -80,7 +80,8 @@ const TreeVisualizer: React.FC = () => {
        bt: tree.bt,
        rbt: tree.rbt,
      }));
-     const values = inputValue.split(",").map((value) => parseInt(value.trim()));
+     const values = Array.from(new Set(inputValue.split(",").map((value) => parseInt(value.trim()))));
+     
      if (values.some((value) => isNaN(value))) {
       toast.error("Not a number", {
         duration: 4000,
