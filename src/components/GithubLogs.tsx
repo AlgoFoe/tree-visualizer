@@ -13,7 +13,10 @@ type RecentCommit = {
   message: string;
   author: string;
   timestamp: string;
+  sha: string;
+  state?: string; 
 };
+
 
 type StatsPayload = {
   type: string;
@@ -36,7 +39,7 @@ const GithubLogs: React.FC = () => {
       const { data: statsData } = await supabase.from("stats").select("type, count");
       const { data: commitsData } = await supabase
         .from("commits")
-        .select("message, author, timestamp")
+        .select("message, author, timestamp, sha, state")
         .order("timestamp", { ascending: false })
         .limit(5);
 
@@ -88,10 +91,27 @@ const GithubLogs: React.FC = () => {
       )
       .subscribe();
 
+    const deploymentsSubscription = supabase
+     .channel("realtime:public:deployments")
+     .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deployments" },
+        (payload: RealtimePostgresChangesPayload<{sha:string;state:string}>)=>{
+          if(payload.eventType === "INSERT" || payload.eventType === "UPDATE"){
+            setRecentCommits((prevCommits)=>
+              prevCommits.map((commit)=>
+                commit.sha === payload.new.sha? {...commit,state:payload.new.state}:commit  
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
     // Clean up subscriptions on component unmount
     return () => {
       supabase.removeChannel(statsSubscription);
       supabase.removeChannel(commitsSubscription);
+      supabase.removeChannel(deploymentsSubscription);
     };
   }, []);
 

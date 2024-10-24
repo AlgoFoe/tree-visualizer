@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'status': {
-        // Fetch the latest deployment details from Vercel with authorization
+        // fetch the latest deployment details from Vercel with authorization
         const deploymentsRes = await axios.get(VERCEL_DEPLOYMENTS_API, {
           headers: {
             Authorization: `Bearer ${VERCEL_API_TOKEN}`,
