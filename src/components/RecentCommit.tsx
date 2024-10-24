@@ -5,7 +5,7 @@ interface Commit {
   author: string;
   message: string;
   timestamp: string;
-  state?:string;
+  color: string;
 }
 // committer's name: commit.author 
 // commit message: commit.message
@@ -14,19 +14,10 @@ const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
   commit,
   index,
 }) => {
-  const getColorClass = () => {
-    switch (commit.state) {
-      case 'QUEUED':
-        return 'text-orange-500';
-      case 'READY':
-        return 'text-green-500';
-      default:
-        return 'text-gray-300';
-    }
-  };  
+  console.log("Commit color: " + commit.color);
   return (
     <div key={index} className="flex p-1.5 bg-gray-800 rounded-lg shadow-md min-w-fit">
-      <div className={`flex flex-col ${getColorClass()}`}>
+      <div className={`flex flex-col ${commit.color}`}>
         <div className="flex gap-1">
             <FiGitCommit className="w-6 h-6 text-green-500 text-yellow-600" />
             <p className="overflow-hidden w-64 text-ellipsis">{commit.message}</p>

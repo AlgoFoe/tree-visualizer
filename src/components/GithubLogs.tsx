@@ -14,7 +14,7 @@ type RecentCommit = {
   author: string;
   timestamp: string;
   sha: string;
-  state?: string; 
+  color: string; 
 };
 
 
@@ -39,7 +39,7 @@ const GithubLogs: React.FC = () => {
       const { data: statsData } = await supabase.from("stats").select("type, count");
       const { data: commitsData } = await supabase
         .from("commits")
-        .select("message, author, timestamp, sha")
+        .select("message, author, timestamp, sha, color")
         .order("timestamp", { ascending: false })
         .limit(5);
 
@@ -98,9 +98,13 @@ const GithubLogs: React.FC = () => {
         { event: "*", schema: "public", table: "deployments" },
         (payload: RealtimePostgresChangesPayload<{sha:string;state:string}>)=>{
           if(payload.eventType === "INSERT" || payload.eventType === "UPDATE"){
+            const newColor = 
+            payload.new.state === 'QUEUED' ? 'text-yellow-700' :
+            payload.new.state === 'READY' ? 'text-green-500' :
+            'text-slate-300';
             setRecentCommits((prevCommits)=>
               prevCommits.map((commit)=>
-                commit.sha === payload.new.sha? {...commit,state:payload.new.state}:commit  
+                commit.sha === payload.new.sha? {...commit,color : newColor}:commit  
               )
             );
           }

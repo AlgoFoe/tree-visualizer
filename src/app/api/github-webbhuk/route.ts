@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
           author: commitAuthor,
           timestamp: commitTimestamp,
           sha: commitSha,
+          color: 'text-slate-300'
         });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
               author: commitAuthor,
               timestamp: commitTimestamp,
               sha: commitSha,
+              color: 'text-slate-300'
             },
           ]);
         }
@@ -75,6 +77,7 @@ export async function POST(req: NextRequest) {
                 author: prAuthor,
                 timestamp: prMergedAt,
                 sha: prSha,
+                color: 'text-slate-300'
               },
             ]);
           }
@@ -95,6 +98,11 @@ export async function POST(req: NextRequest) {
         const deploymentSha = latestDeployment.meta.githubCommitSha;
         const deploymentState = latestDeployment.state;
 
+        const color =
+          deploymentState === 'QUEUED' ? 'text-yellow-700' :
+          deploymentState === 'READY' ? 'text-green-500' :
+          'text-slate-300';
+
         console.log({
           deployment_id: deploymentId,
           state: deploymentState,
@@ -114,6 +122,10 @@ export async function POST(req: NextRequest) {
             ],
             { onConflict: 'deployment_id' }
           );
+          await supabase
+            .from('commits')
+            .update({ color: color })
+            .eq('sha', deploymentSha);
         }
         break;
       }
