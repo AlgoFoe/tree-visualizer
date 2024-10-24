@@ -13,7 +13,7 @@ const VERCEL_API_TOKEN = "k9RwIrkjZ8zRTGblGuK0O8gP";
 export async function POST(req: NextRequest) {
   try {
     const payload = await req.json();
-    const event = req.headers.get('x-github-event')?.toLowerCase(); 
+    const event = req.headers.get('x-github-event'); 
 
     console.log("Received event:", event);
     console.log("Payload:", payload);
