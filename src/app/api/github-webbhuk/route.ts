@@ -6,8 +6,13 @@ import axios from 'axios';
 const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzamdoeXZ5ZGdhZGlvaGJhb2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyOTQyNDE0OSwiZXhwIjoyMDQ1MDAwMTQ5fQ.m6ahlj5ItQli2o-6X-nArttJx2ENYxUi_Ta9AMuoWLc";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-console.log("URL : ",SUPABASE_URL);
+console.log("URL : ", SUPABASE_URL);
+
+// configuring github
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
+
+// configuring vercel
+const VERCEL_API_DEPLOYMENTS_URL = 'https://api.vercel.com/v6/deployments'
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +28,7 @@ export async function POST(req: NextRequest) {
         const starsCount = data.stargazers_count;
         const forksCount = data.forks_count;
 
-        console.log({"stars" : starsCount,"forks" : forksCount});
+        console.log({ "stars": starsCount, "forks": forksCount });
         // update and insert
         await supabase.from('stats').upsert(
           [
@@ -39,17 +44,22 @@ export async function POST(req: NextRequest) {
         const commitMessage = payload.head_commit?.message;
         const commitAuthor = payload.pusher?.name;
         const commitTimestamp = payload.head_commit?.timestamp;
+        const commitSha = payload.head_commit?.id; 
+
         console.log({
           message: commitMessage,
           author: commitAuthor,
           timestamp: commitTimestamp,
+          sha: commitSha
         });
-        if (commitMessage && commitAuthor && commitTimestamp) {
+
+        if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
           await supabase.from('commits').insert([
             {
               message: commitMessage,
               author: commitAuthor,
               timestamp: commitTimestamp,
+              sha: commitSha,
             },
           ]);
         }
@@ -61,19 +71,54 @@ export async function POST(req: NextRequest) {
           const prTitle = payload.pull_request?.title;
           const prAuthor = payload.pull_request?.user?.login;
           const prMergedAt = payload.pull_request?.merged_at;
+          const prSha = payload.pull_request?.merge_commit_sha;
 
-          if (prTitle && prAuthor && prMergedAt) {
+          if (prTitle && prAuthor && prMergedAt && prSha) {
             await supabase.from('commits').insert([
               {
                 message: `PR merged: ${prTitle}`,
                 author: prAuthor,
                 timestamp: prMergedAt,
+                sha: prSha,
               },
             ]);
           }
         }
         break;
       }
+
+      case 'status': {
+        // fetch the latest deployment
+        const deploymentsRes = await axios.get(VERCEL_API_DEPLOYMENTS_URL);
+        const latestDeployment = deploymentsRes.data.deployments[0];
+        const deploymentId = latestDeployment.uid;
+        const deploymentState = latestDeployment.state;
+        // fetch deployment details
+        const deploymentDetailsRes = await axios.get(
+          `https://api.vercel.com/v13/deployments/${deploymentId}?withGitRepoInfo=true`
+        );
+        const deploymentDetails = deploymentDetailsRes.data;
+        const deploymentSha = deploymentDetails.meta.githubCommitSha; 
+        console.log({
+          deployment_id: deploymentId,
+          state: deploymentState,
+          created_at: new Date(latestDeployment.created).toISOString(),
+          sha: deploymentSha, 
+        });
+        await supabase.from('deployments').upsert(
+          [
+            {
+              deployment_id: deploymentId,
+              state: deploymentState,
+              created_at: new Date(latestDeployment.created).toISOString(),
+              sha: deploymentSha, 
+            },
+          ],
+          { onConflict: 'deployment_id' }
+        );
+        break;
+      }
+
       default:
         console.log(`Unhandled event: ${event}`);
     }
