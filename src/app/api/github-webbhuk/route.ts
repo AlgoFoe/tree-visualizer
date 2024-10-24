@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
         const deploymentState = latestDeployment.state;
 
         const color =
-          deploymentState === 'QUEUED' ? 'text-yellow-700' : 'text-red-700';
+          deploymentState === 'QUEUED' || 'BUILDING' ? 'text-yellow-700' : 'text-red-700';
           deploymentState === 'READY' ? 'text-green-500' : 'text-red-700';
 
         console.log({

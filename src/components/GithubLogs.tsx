@@ -99,7 +99,7 @@ const GithubLogs: React.FC = () => {
         (payload: RealtimePostgresChangesPayload<{sha:string;state:string}>)=>{
           if(payload.eventType === "INSERT" || payload.eventType === "UPDATE"){
             const newColor = 
-            payload.new.state === 'QUEUED' ? 'text-yellow-700' :'text-red-700';
+            payload.new.state === 'QUEUED' || 'BUILDING' ? 'text-yellow-700' :'text-red-700';
             payload.new.state === 'READY' ? 'text-green-500' : 'text-red-300';
             setRecentCommits((prevCommits)=>
               prevCommits.map((commit)=>
