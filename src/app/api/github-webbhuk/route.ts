@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
           timestamp: commitTimestamp,
           sha: commitSha,
           color: 'text-slate-300',
-          branch:"branch : ",branchName
+          branch:"Branch : ",branchName
         });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
