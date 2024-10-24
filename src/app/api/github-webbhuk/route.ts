@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         const commitMessage = payload.head_commit?.message;
         const commitAuthor = payload.pusher?.name;
         const commitTimestamp = payload.head_commit?.timestamp;
-        const branchName = payload.ref.split('/').pop();
+        const branchName = payload.ref;
         const commitSha = payload.head_commit?.id || payload.head_commit?.sha;
 
         console.log({
