@@ -14,7 +14,7 @@ const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
   commit,
   index,
 }) => {
-  console.log("Commit color: " + commit.color);
+  console.log("Commit color: "+ commit.color+" commit message: "+ commit.message);
   return (
     <div key={index} className="flex p-1.5 bg-gray-800 rounded-lg shadow-md min-w-fit">
       <div className={`flex flex-col ${commit.color}`}>

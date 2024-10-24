@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
           author: commitAuthor,
           timestamp: commitTimestamp,
           sha: commitSha,
-          color: 'text-slate-300'
+          color: 'text-yellow-600'
         });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
               author: commitAuthor,
               timestamp: commitTimestamp,
               sha: commitSha,
-              color: 'text-slate-300'
+              color: 'text-yellow-600'
             },
           ]);
         }
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
                 author: prAuthor,
                 timestamp: prMergedAt,
                 sha: prSha,
-                color: 'text-slate-300'
+                color: 'text-yellow-600'
               },
             ]);
           }

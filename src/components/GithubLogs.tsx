@@ -81,7 +81,7 @@ const GithubLogs: React.FC = () => {
         "postgres_changes",
         { event: "*", schema: "public", table: "commits" },
         (payload: RealtimePostgresChangesPayload<RecentCommit>) => {
-          if (payload.eventType === "INSERT" && isRecentCommit(payload.new)) {
+          if ((payload.eventType === "INSERT" || payload.eventType === "UPDATE") && isRecentCommit(payload.new)) {
             setRecentCommits((prevCommits) => [
               payload.new,
               ...prevCommits.slice(0, 4),
