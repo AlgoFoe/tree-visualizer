@@ -8,6 +8,7 @@ const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
 const VERCEL_DEPLOYMENTS_API = "https://api.vercel.com/v6/deployments";
+const VERCEL_API_TOKEN = "k9RwIrkjZ8zRTGblGuK0O8gP"; 
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,8 +45,8 @@ export async function POST(req: NextRequest) {
           message: commitMessage,
           author: commitAuthor,
           timestamp: commitTimestamp,
-          sha: "SHA is ",commitSha,
-        })
+          sha: commitSha,
+        });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
           await supabase.from('commits').insert([
@@ -82,21 +83,24 @@ export async function POST(req: NextRequest) {
       }
 
       case 'status': {
-        // Fetch the latest deployment details from Vercel
-        const deploymentsRes = await axios.get(VERCEL_DEPLOYMENTS_API);
+        // Fetch the latest deployment details from Vercel with authorization
+        const deploymentsRes = await axios.get(VERCEL_DEPLOYMENTS_API, {
+          headers: {
+            Authorization: `Bearer ${VERCEL_API_TOKEN}`,
+          },
+        });
+
         const latestDeployment = deploymentsRes.data.deployments[0];
         const deploymentId = latestDeployment.uid;
         const deploymentSha = latestDeployment.meta.githubCommitSha;
         const deploymentState = latestDeployment.state;
 
-        console.log(
-          {
-            deployment_id: deploymentId,
-            state: deploymentState,
-            created_at: new Date(latestDeployment.created).toISOString(),
-            sha: deploymentSha,
-          }
-        )
+        console.log({
+          deployment_id: deploymentId,
+          state: deploymentState,
+          created_at: new Date(latestDeployment.created).toISOString(),
+          sha: deploymentSha,
+        });
 
         if (deploymentSha) {
           await supabase.from('deployments').upsert(
