@@ -2,24 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 
-// configuring supabase
+// Supabase configuration
 const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzamdoeXZ5ZGdhZGlvaGJhb2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyOTQyNDE0OSwiZXhwIjoyMDQ1MDAwMTQ5fQ.m6ahlj5ItQli2o-6X-nArttJx2ENYxUi_Ta9AMuoWLc";
+const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-console.log("URL : ", SUPABASE_URL);
-
-// configuring github
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
-
-// configuring vercel
-const VERCEL_API_DEPLOYMENTS_URL = 'https://api.vercel.com/v6/deployments'
+const VERCEL_DEPLOYMENTS_API = "https://api.vercel.com/v6/deployments";
 
 export async function POST(req: NextRequest) {
   try {
     const payload = await req.json();
-    const event = req.headers.get('x-github-event');
+    const event = req.headers.get('x-github-event')?.toLowerCase(); 
 
-    console.log("Payload : ", payload);
+    console.log("Received event:", event);
+    console.log("Payload:", payload);
 
     switch (event) {
       case 'watch':
@@ -28,8 +24,6 @@ export async function POST(req: NextRequest) {
         const starsCount = data.stargazers_count;
         const forksCount = data.forks_count;
 
-        console.log({ "stars": starsCount, "forks": forksCount });
-        // update and insert
         await supabase.from('stats').upsert(
           [
             { type: 'stars', count: starsCount },
@@ -44,14 +38,14 @@ export async function POST(req: NextRequest) {
         const commitMessage = payload.head_commit?.message;
         const commitAuthor = payload.pusher?.name;
         const commitTimestamp = payload.head_commit?.timestamp;
-        const commitSha = payload.head_commit?.id; 
+        const commitSha = payload.head_commit?.id || payload.head_commit?.sha;
 
         console.log({
           message: commitMessage,
           author: commitAuthor,
           timestamp: commitTimestamp,
-          sha: commitSha
-        });
+          sha: "SHA is ",commitSha,
+        })
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
           await supabase.from('commits').insert([
@@ -88,34 +82,35 @@ export async function POST(req: NextRequest) {
       }
 
       case 'status': {
-        // fetch the latest deployment
-        const deploymentsRes = await axios.get(VERCEL_API_DEPLOYMENTS_URL);
+        // Fetch the latest deployment details from Vercel
+        const deploymentsRes = await axios.get(VERCEL_DEPLOYMENTS_API);
         const latestDeployment = deploymentsRes.data.deployments[0];
         const deploymentId = latestDeployment.uid;
+        const deploymentSha = latestDeployment.meta.githubCommitSha;
         const deploymentState = latestDeployment.state;
-        // fetch deployment details
-        const deploymentDetailsRes = await axios.get(
-          `https://api.vercel.com/v13/deployments/${deploymentId}?withGitRepoInfo=true`
-        );
-        const deploymentDetails = deploymentDetailsRes.data;
-        const deploymentSha = deploymentDetails.meta.githubCommitSha; 
-        console.log({
-          deployment_id: deploymentId,
-          state: deploymentState,
-          created_at: new Date(latestDeployment.created).toISOString(),
-          sha: deploymentSha, 
-        });
-        await supabase.from('deployments').upsert(
-          [
-            {
-              deployment_id: deploymentId,
-              state: deploymentState,
-              created_at: new Date(latestDeployment.created).toISOString(),
-              sha: deploymentSha, 
-            },
-          ],
-          { onConflict: 'deployment_id' }
-        );
+
+        console.log(
+          {
+            deployment_id: deploymentId,
+            state: deploymentState,
+            created_at: new Date(latestDeployment.created).toISOString(),
+            sha: deploymentSha,
+          }
+        )
+
+        if (deploymentSha) {
+          await supabase.from('deployments').upsert(
+            [
+              {
+                deployment_id: deploymentId,
+                state: deploymentState,
+                created_at: new Date(latestDeployment.created).toISOString(),
+                sha: deploymentSha,
+              },
+            ],
+            { onConflict: 'deployment_id' }
+          );
+        }
         break;
       }
 
