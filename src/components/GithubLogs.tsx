@@ -15,6 +15,7 @@ type RecentCommit = {
   timestamp: string;
   sha: string;
   color: string; 
+  branch: string;
 };
 
 
@@ -39,7 +40,7 @@ const GithubLogs: React.FC = () => {
       const { data: statsData } = await supabase.from("stats").select("type, count");
       const { data: commitsData } = await supabase
         .from("commits")
-        .select("message, author, timestamp, sha, color")
+        .select("message, author, timestamp, sha, color, branch")
         .order("timestamp", { ascending: false })
         .limit(5);
 
