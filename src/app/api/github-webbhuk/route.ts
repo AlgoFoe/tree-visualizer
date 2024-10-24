@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Supabase configuration
 const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
-const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzamdoeXZ5ZGdhZGlvaGJhb2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyOTQyNDE0OSwiZXhwIjoyMDQ1MDAwMTQ5fQ.m6ahlj5ItQli2o-6X-nArttJx2ENYxUi_Ta9AMuoWLc";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
 const VERCEL_DEPLOYMENTS_API = "https://api.vercel.com/v6/deployments";
