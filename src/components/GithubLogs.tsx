@@ -39,7 +39,7 @@ const GithubLogs: React.FC = () => {
       const { data: statsData } = await supabase.from("stats").select("type, count");
       const { data: commitsData } = await supabase
         .from("commits")
-        .select("message, author, timestamp, sha, state")
+        .select("message, author, timestamp, sha")
         .order("timestamp", { ascending: false })
         .limit(5);
 
