@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
           sha: commitSha,
           color: 'text-slate-300',
           branch:"Branch : ",branchName,
-          avatarUrl: avatarUrl,
+          avatarurl: "Avatar url: ",avatarUrl,
         });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
               sha: commitSha,
               color: 'text-slate-300',
               branch:branchName,
-              avatarUrl: avatarUrl,
+              avatarurl: avatarUrl,
             },
           ]);
         }
