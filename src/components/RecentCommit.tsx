@@ -31,9 +31,7 @@ const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
       <div className="flex flex-col gap-1 items-end justify-around max-xl:hidden">
           <div className="flex justify-center items-center gap-2">
               <p className="text-sm font-bold text-gray-400">{commit.author}</p>
-              {/* <Image src='https://avatars.githubusercontent.com/u/88921846?v=4' alt="avatar" width={80} height={80} className="rounded-full w-9 h-9" /> */}
-
-              <Image src={commit.avatarurl ? commit.avatarurl:'/ball.png'} alt="avatar" width={80} height={80} className="rounded-full w-9 h-9" />
+              <Image src={commit.avatarurl ? commit.avatarurl:'/profile.jpeg'} alt="avatar" width={80} height={80} className="rounded-full w-9 h-9" />
           </div>
           <div className="text-sm">
               <p className="text-nowrap text-gray-400">{commit.timestamp}</p>
