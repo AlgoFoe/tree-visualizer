@@ -92,7 +92,7 @@ export async function POST(req: NextRequest){
               console.error('Error updating branchcolor:', error);
             } else {
               console.log('Branchcolor updated to green successfully.');
-            
+            }
           }
         }
         break;
