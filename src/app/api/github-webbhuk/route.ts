@@ -78,6 +78,7 @@ export async function POST(req: NextRequest){
           const prAuthor = payload.pull_request?.user?.login;
           const prMergedAt = payload.pull_request?.merged_at;
           const prSha = payload.pull_request?.merge_commit_sha;
+          const commitSha = payload.pull_request?.head.sha;
           console.log("PR Details: "+prAuthor+" time "+ prMergedAt+" sha "+ prSha);
           if (prSha) {
             console.log(`Changing branchcolor to green for PR: ${prTitle}, PR SHA: ${prSha}`);
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest){
             const { error } = await supabase
               .from('commits')
               .update({ branchcolor: 'text-green-500' })
-              .eq('sha', prSha);
+              .eq('sha', commitSha);
       
             if (error) {
               console.error('Error updating branchcolor:', error);
