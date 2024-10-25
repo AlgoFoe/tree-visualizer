@@ -8,6 +8,7 @@ interface Commit {
   timestamp: string;
   color: string;
   branch: string; 
+  branchcolor:string;
   avatarurl: string;  
 }
 
@@ -24,7 +25,7 @@ const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
             <p className="overflow-hidden w-64 text-ellipsis">{commit.message}</p>
         </div>
         <div className="flex gap-2">
-            <FiGitBranch className="w-5 h-5" />
+            <FiGitBranch className={`w-5 h-5 ${commit.branchcolor}`} />
             <p>{commit.branch}</p>
         </div>
       </div>

@@ -9,7 +9,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // github config
 const GITHUB_API_URL = 'https://api.github.com/repos/AlgoFoe/tree-visualizer';
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest){
   try {
     const payload = await req.json();
     const event = req.headers.get('x-github-event'); 
@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
         const avatarUrl = payload.sender.avatar_url;
         const commitSha = payload.head_commit?.id || payload.head_commit?.sha;
 
+        const branchColor = branchName === "main" ? 'text-green-500': 'text-yellow-700';
+        
         console.log({
           message: commitMessage,
           author: commitAuthor,
@@ -50,6 +52,7 @@ export async function POST(req: NextRequest) {
           color: 'text-slate-300',
           branch:"Branch : ",branchName,
           avatarurl: "Avatar url: ",avatarUrl,
+          branchcolor:"Branch color: ",branchColor,
         });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
@@ -62,6 +65,7 @@ export async function POST(req: NextRequest) {
               color: 'text-slate-300',
               branch:branchName,
               avatarurl: avatarUrl, 
+              branchcolor:branchColor
             },
           ]);
         }
@@ -76,16 +80,10 @@ export async function POST(req: NextRequest) {
           const prSha = payload.pull_request?.merge_commit_sha;
 
           if (prTitle && prAuthor && prMergedAt && prSha) {
-            await supabase.from('commits').insert([
-              {
-                message: `PR merged: ${prTitle}`,
-                author: prAuthor,
-                timestamp: prMergedAt,
-                sha: prSha,
-                color: 'text-slate-300',
-                // branch : branchName
-              },
-            ]);
+            await supabase
+            .from('commits')
+            .update({branchcolor:'text-green-500'})
+            .eq('sha', prSha);
           }
         }
         break;
@@ -98,6 +96,7 @@ export async function POST(req: NextRequest) {
         const color =
         deploymentState === 'pending' ? 'text-yellow-700' :
         deploymentState === 'success' ? 'text-green-500' :
+        deploymentState === 'failure' ? 'text-red-600' :
         'text-slate-300';
 
         if (commitSha) {

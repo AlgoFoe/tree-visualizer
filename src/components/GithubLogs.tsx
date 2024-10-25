@@ -16,6 +16,7 @@ type RecentCommit = {
   sha: string;
   color: string; 
   branch: string;
+  branchcolor: string;
   avatarurl: string;
 };
 
@@ -41,7 +42,7 @@ const GithubLogs: React.FC = () => {
       const { data: statsData } = await supabase.from("stats").select("type, count");
       const { data: commitsData } = await supabase
         .from("commits")
-        .select("message, author, timestamp, sha, color, branch, avatarurl")
+        .select("message, author, timestamp, sha, color, branch, avatarurl, branchcolor")
         .order("timestamp", { ascending: false })
         .limit(5);
 
@@ -87,7 +88,7 @@ const GithubLogs: React.FC = () => {
             
             // insert new commit with default color
             setRecentCommits((prevCommits) => [
-              { ...payload.new, color: payload.new.color || 'text-slate-300' },
+              { ...payload.new, color: payload.new.color || 'text-slate-300', branchcolor: payload.new.branchcolor || 'text-slate-300'},
               ...prevCommits.slice(0, 4),
             ]);
           } else if (payload.eventType === "UPDATE" && payload.new) {
@@ -95,7 +96,7 @@ const GithubLogs: React.FC = () => {
             // update commit color based on new state
             setRecentCommits((prevCommits) =>
               prevCommits.map((commit) =>
-                commit.sha === payload.new.sha ? { ...commit, color: payload.new.color } : commit
+                commit.sha === payload.new.sha ? { ...commit, color: payload.new.color, branchcolor: payload.new.branchcolor} : commit
               )
             );
           }
