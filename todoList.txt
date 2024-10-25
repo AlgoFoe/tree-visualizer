@@ -7,4 +7,5 @@ Payments :
     - maybe a upi code or gpay
 (testing webhook integration with supabase realtime updates)
 (testing pull request branch1)
+(testing pull request branch2)
 (testing branchcolor realtime updates)
