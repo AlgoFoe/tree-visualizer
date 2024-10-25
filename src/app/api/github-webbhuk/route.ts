@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
         const commitAuthor = payload.pusher?.name;
         const commitTimestamp = payload.head_commit?.timestamp;
         const branchName = payload.ref.split('/').pop();
+        const avatarUrl = payload.sender.avatar_url;
         const commitSha = payload.head_commit?.id || payload.head_commit?.sha;
 
         console.log({
@@ -47,7 +48,8 @@ export async function POST(req: NextRequest) {
           timestamp: commitTimestamp,
           sha: commitSha,
           color: 'text-slate-300',
-          branch:"Branch : ",branchName
+          branch:"Branch : ",branchName,
+          avatarUrl: avatarUrl,
         });
 
         if (commitMessage && commitAuthor && commitTimestamp && commitSha) {
@@ -58,7 +60,8 @@ export async function POST(req: NextRequest) {
               timestamp: commitTimestamp,
               sha: commitSha,
               color: 'text-slate-300',
-              branch:branchName
+              branch:branchName,
+              avatarUrl: avatarUrl,
             },
           ]);
         }

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 import { FiGitBranch, FiGitCommit } from "react-icons/fi";
 
@@ -7,6 +8,7 @@ interface Commit {
   timestamp: string;
   color: string;
   branch: string; 
+  avatarUrl: string;  
 }
 
 const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
@@ -27,13 +29,15 @@ const RecentCommit: React.FC<{commit: Commit; index: number }> = ({
         </div>
       </div>
       <div className="flex flex-col gap-1 items-end justify-around max-xl:hidden">
-            <div className="flex justify-center items-center gap-2">
-                <p className="text-sm font-bold text-gray-400">{commit.author}</p>
-                <div className="rounded-full bg-red-200 w-7 h-7"></div>
-            </div>
-            <div className="text-sm">
-                <p className="text-nowrap text-gray-400">{commit.timestamp}</p>
-            </div>
+          <div className="flex justify-center items-center gap-2">
+              <p className="text-sm font-bold text-gray-400">{commit.author}</p>
+              {/* <Image src='https://avatars.githubusercontent.com/u/88921846?v=4' alt="avatar" width={80} height={80} className="rounded-full w-9 h-9" /> */}
+
+              <Image src={commit.avatarUrl ? commit.avatarUrl:'ball.png'} alt="avatar" width={80} height={80} className="rounded-full w-9 h-9" />
+          </div>
+          <div className="text-sm">
+              <p className="text-nowrap text-gray-400">{commit.timestamp}</p>
+          </div>
       </div>
     </div>
   );
