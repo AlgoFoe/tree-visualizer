@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
               sha: commitSha,
               color: 'text-slate-300',
               branch:branchName,
-              avatarurl: avatarUrl,
+              avatarurl: avatarUrl, 
             },
           ]);
         }
