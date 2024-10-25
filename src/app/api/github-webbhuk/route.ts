@@ -78,8 +78,8 @@ export async function POST(req: NextRequest){
           const prAuthor = payload.pull_request?.user?.login;
           const prMergedAt = payload.pull_request?.merged_at;
           const prSha = payload.pull_request?.merge_commit_sha;
-
-          if (prTitle && prAuthor && prMergedAt && prSha) {
+          console.log("PR Details: "+prAuthor+" time "+ prMergedAt+" sha "+ prSha);
+          if (prSha) {
             console.log(`Changing branchcolor to green for PR: ${prTitle}, PR SHA: ${prSha}`);
             
             const { error } = await supabase
