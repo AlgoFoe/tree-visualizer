@@ -41,6 +41,24 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.scroll-shadow {
+  position: relative;
+  max-height: 180px; /* This should match the max height of the overflow-y container */
+  overflow-y: auto;
+  background:
+    /* Shadow covers */
+    linear-gradient(#1F2937 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(rgba(255, 255, 255, 0), #1F2937 70%) 0 100%,
+    /* Shadows */
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0)),
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0)) 0 100%;
+  background-repeat: no-repeat;
+  background-color: #1F2937;
+  background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+  background-attachment: local, local, scroll, scroll;
+}
+
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

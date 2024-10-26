@@ -504,8 +504,8 @@ const TreeVisualizer: React.FC = () => {
           width:
             window.innerWidth > 768
               ? `${Math.max(treeWidth, canvasSize.width)}px`
-              : "100%", // Dynamic for larger, fixed for mobile
-          height: `calc(100vh - 150px)`, // Fixed height with padding
+              : "100%",
+          height: `calc(100vh - 10px)`,
         }}
       >
         <span className="flex justify-end gap-1 items-end p-1 bg-gradient-to-b from-slate-300 select-none">

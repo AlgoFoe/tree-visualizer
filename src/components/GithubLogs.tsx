@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FaStar, FaCodeBranch, FaDonate, FaGithub } from "react-icons/fa";
+import { FaStar, FaCodeBranch, FaGithub } from "react-icons/fa";
 import { createClient, RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import Link from "next/link";
 import RecentCommit from './RecentCommit'
+import Donations from "./Donations";
 
 const SUPABASE_URL = "https://rsjghyvydgadiohbaofg.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzamdoeXZ5ZGdhZGlvaGJhb2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0MjQxNDksImV4cCI6MjA0NTAwMDE0OX0.MIIt_s7sQbzvOGfV7pUbAXiSVubutoFn9-sPDqKrevE";
@@ -26,17 +27,12 @@ type StatsPayload = {
   count: number;
 };
 
-const DONATION_LINK = "https://payment-link.vercel.app";
 
 const GithubLogs: React.FC = () => {
   const [stars, setStars] = useState<number>(0);
   const [forks, setForks] = useState<number>(0);
   const [recentCommits, setRecentCommits] = useState<RecentCommit[]>([]);
-  const topDonors = [
-    { name: "Varun Singh", amount: "₹1200", message: "Loved to contribute" },
-    { name: "Ben Dover", amount: "₹1000", message: "God's work" },
-  ];
-
+  
   const fetchInitialData = async () => {
     try {
       const { data: statsData } = await supabase.from("stats").select("type, count");
@@ -167,35 +163,7 @@ const GithubLogs: React.FC = () => {
           )}
         </div>
       </div>
-
-      <div className="bg-gray-800 rounded-t-lg shadow-md p-3 mt-4 h-full">
-        <h2 className="text-lg font-bold text-emerald-400">Plant a Tree</h2>
-        <p className="text-sm text-gray-400">Top donors</p>
-        <div className="space-y-1 mt-2">
-          {topDonors.map((donor, index) => (
-            <div key={index} className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">
-                  {index + 1}. {donor.name}
-                </p>
-                <p className="text-xs text-gray-400">message - {donor.message}</p>
-              </div>
-              <span className="text-cyan-400 font-bold">{donor.amount}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-gray-800 rounded-b-lg shadow-md p-3">
-        <Link
-          href={DONATION_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center mt-3 bg-teal-600 text-white py-1 px-3 rounded-lg w-full"
-        >
-          <FaDonate className="mr-2" /> Donate Now
-        </Link>
-      </div>
+      <Donations/>
     </div>
   );
 };
