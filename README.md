@@ -90,7 +90,7 @@ The application will be accessible at http://localhost:3000.
 
 ### 🤝 Contributing
 Contributions, issues, and feature requests are welcome!
-Feel free to check the issues page- https://github.com/AlgoFoe/tree-visualizer/issues.
+Feel free to check the [issues](https://github.com/AlgoFoe/tree-visualizer/issues) page.
 
 ### 📝 License
 This project is licensed under the MIT License - see the LICENSE file for details.
