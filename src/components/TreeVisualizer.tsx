@@ -232,9 +232,9 @@ const TreeVisualizer: React.FC = () => {
         <Text
           key={`text-${node.value}`}
           text={node.value.toString()}
-          x={x - 12 * zoomLevel}
-          y={y - 10}
-          fontSize={20 * zoomLevel}
+          x={x - (20 * zoomLevel) * node.value.toString().length / 4}
+          y={y - (20 * zoomLevel) / 2.5}
+          fontSize={20}
           fill="white"
           scaleX={zoomLevel}
           scaleY={zoomLevel} 
@@ -360,7 +360,9 @@ const TreeVisualizer: React.FC = () => {
       y: pointer.y - mousePointTo.y * newScale,
     };
 
-    setZoomLevel(newScale);
+    // changing pos but not zoom level after a certain point
+    // creating an illusion of zoom
+    if (newScale < 1.8 && newScale > 0.5) setZoomLevel(newScale);
     setStagePos(newPos);
 
     stage.scale({ x: newScale, y: newScale }); 
